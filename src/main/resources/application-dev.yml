@@ -1,0 +1,16 @@
+spring:
+  shardingsphere:
+    sharding:
+      default-databases-strategy:
+        inline:
+          sharding-column: id
+          algorithm-expression: sharding$->{id%2+1}
+      t_board:
+        key-generator-column-name: id
+        key-generator:
+          column: id
+          type: SNOWFLAKE
+        actual-data-nodes: sharding$->{1..2}.t_board
+    props:
+      sql:
+        show: 'true'

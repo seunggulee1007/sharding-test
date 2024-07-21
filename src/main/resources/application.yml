@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: sharding
+  shardingsphere:
+    datasource:
+      names: sharding1, sharding2
+      sharding1:
+          type: com.zaxxer.hikari.HikariDataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          jdbc-url: jdbc:mysql://sgyj-dev.synology.me:13311/sharding?serverTimezone=UTC&useSSL=false
+          username: yeji
+          password: yeji
+      sharding2:
+          type: com.zaxxer.hikari.HikariDataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          jdbc-url: jdbc:mysql://sgyj-dev.synology.me:13312/sharding?serverTimezone=UTC&useSSL=false
+          username: yeji
+          password: yeji
+    sharding:
+      tables:
+        t_board:
+          key-generator:
+            type: SNOWFLAKE
+            column: id
+            props:
+              worker:
+                id: '123'
+          actual-data-nodes: sharding$->{1..2}.t_board_$->{1..2}
+          table-strategy:
+            inline:
+              algorithm-expression: t_board->{id % 2}
+              sharding-column: id
+      default-data-source-name: sharding1
+      binding-tables: t_board
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
